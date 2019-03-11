@@ -1,5 +1,6 @@
 package fix.core;
 
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
@@ -72,6 +73,31 @@ public final class GameAgentMain {
             }
 
             //TODO : 及时执行的代码
+//            TaskConfig taskConfig = ApplicationContextUtil.getContext().getBean(TaskConfig.class);
+//            System.err.println(DateUtils.getNextTime(taskConfig.getDailyResetTime(), new Date()));
+//            Scheduler scheduler = ApplicationContextUtil.getContext().getBean(Scheduler.class);
+//            scheduler.schedule(new ScheduledTask() {
+//                @Override
+//                public String getName() {
+//                    return "DailyResetJob";
+//                }
+//
+//                @Override
+//                public void run() {
+//                    for (ClientSession clientSession : ClientSessionManager.get().getAllOnline()) {
+//                        String playerId = clientSession.getPlayerId();
+//
+//                        ActorRef playerActor = ActorSystem.get().select(ActorGroup.PlayerActor, playerId);
+//
+//                        if (playerActor != null) {
+//                            //send reset
+//                            Event event = new Event(EventSources.GameLayer, EventIds.DAILY_RESET, new Date());
+//                            playerActor.tell(event, null);
+//                        }
+//                    }
+//                }
+//            }, new CronTrigger(taskConfig.getDailyResetTime()));
+
 
             //StorageManager
 //            RankExService activityFubenTemplate = (RankExService) ApplicationContextUtil.getContext().getBean(RankExService.class);

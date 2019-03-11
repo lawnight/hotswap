@@ -62,4 +62,7 @@ public class BugClass {
 		}
 	}
 
+	public static void main(String[] args) {
+	}
+
 }

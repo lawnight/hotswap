@@ -1,5 +1,6 @@
 package fix;
 
+import com.digisky.female.princess.server.game.module.condition.BaseCondition;
 import fix.core.*;
 
 import java.io.File;
@@ -21,7 +22,7 @@ public class Main {
 
     //需要更新，并且打包的类
     static {
-        //INCLUDE_FILES.add(ReadingServiceImpl.class);
+        INCLUDE_FILES.add(BaseCondition.class);
     }
 
     private static Main instance = new Main();
@@ -37,7 +38,9 @@ public class Main {
         // File file = new File(claz.getResource("/").getPath() + "/" +
         List<BugClass> clazzs = new ArrayList<>();
         // this is eclipse compile
-        String path = claz.getProtectionDomain().getCodeSource().getLocation().getPath() + "/" + claz.getPackage().getName().replaceAll("\\.", "/");
+        String path =
+            claz.getProtectionDomain().getCodeSource().getLocation().getPath() + "/" + claz.getPackage().getName()
+                .replaceAll("\\.", "/");
         String name = claz.getSimpleName();
 
         List<File> files = findFile(name, new File(path));
@@ -50,6 +53,33 @@ public class Main {
                 bugClass.setFile(file);
                 bugClass.setPackageName(claz.getPackage().getName());
                 bugClass.setClazz(claz);
+                if (file.getName().contains("$")) {
+                    bugClass.setInternal(true);
+                }
+                clazzs.add(bugClass);
+
+            } else {
+                System.err.println("file not exists:" + file.getAbsolutePath());
+            }
+        }
+        return clazzs;
+    }
+
+    public List<BugClass> getBugClass(String fileName) {
+        // File file = new File(claz.getResource("/").getPath() + "/" +
+        List<BugClass> clazzs = new ArrayList<>();
+
+        File theFile = new File((fileName));
+        List<File> files = findFile(theFile.getName(), new File(theFile.getPath()));
+        List<File> packClassFiles = new ArrayList<>();
+        for (File file : files) {
+            if (file.exists()) {
+                packClassFiles.add(file);
+
+                BugClass bugClass = new BugClass();
+                bugClass.setFile(file);
+                //                bugClass.setPackageName(claz.getPackage().getName());
+                //                bugClass.setClazz(claz);
                 if (file.getName().contains("$")) {
                     bugClass.setInternal(true);
                 }
@@ -79,7 +109,7 @@ public class Main {
             manifest.getMainAttributes().putValue("Can-Retransform-Classes", "true");
             manifest.getMainAttributes().putValue("Agent-Class", GameAgentMain.class.getName());
             manifest.getMainAttributes().putValue("File-Params", getFileParam(packClassFiles));
-            manifest.getMainAttributes().putValue("Main-Class", VMAttacher.class.getName());
+            manifest.getMainAttributes().putValue("Main-Class", Boot.class.getName());
             // support
             File file = new File(Constant.agentFile);
             JarOutputStream target = new JarOutputStream(new FileOutputStream(file), manifest);
@@ -144,7 +174,8 @@ public class Main {
                 assert !file.getName().contains(".");
                 classes.addAll(findClasses(file, packageName + "." + file.getName()));
             } else if (file.getName().endsWith(".class")) {
-                classes.add(Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6)));
+                classes
+                    .add(Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6)));
             }
         }
         return classes;
@@ -163,16 +194,18 @@ public class Main {
         return fileParam.toString();
     }
 
-    // Class claz
+    // 找到class类以及其内部类 对应的文件
     public List<File> findFile(String name, File file) {
         List<File> result = new ArrayList<>();
         File[] list = file.listFiles();
         //
-        String pattern = String.format(name + "[$]*.*");
+        String pattern = String.format(name + "\\$.*\\.class");
         if (list != null) {
             for (File fil : list) {
                 if (fil.isDirectory()) {
                     findFile(name, fil);
+                } else if (fil.getName().equalsIgnoreCase(name + ".class")) {
+                    result.add(fil);
                 } else if (Pattern.matches(pattern, fil.getName())) {
                     result.add(fil);
                 }
@@ -187,6 +220,7 @@ public class Main {
         for (URL url : urls) {
             System.out.println(url.getFile());
         }
+        //生成jar包
         Main.get().agentJarGenerate();
     }
 }

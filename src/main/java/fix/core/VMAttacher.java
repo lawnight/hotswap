@@ -7,7 +7,6 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.util.List;
 
-
 public class VMAttacher {
 
     static String agentFile = Constant.agentFile;
